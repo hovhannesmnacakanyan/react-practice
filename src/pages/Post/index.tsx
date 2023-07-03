@@ -1,5 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch } from "../../store";
+import { postsOp, postsSel } from "../../store/posts";
 
 export interface IPost {
   body: string;
@@ -11,35 +14,20 @@ export interface IPost {
 export const Post = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [post, setPost] = useState<IPost | null>(null);
+  const dispatch = useDispatch<AppDispatch>();
+  const post = useSelector(postsSel.postSelector);
 
-  const getPost = async () => {
-    try {
-      const response = await fetch(
-        `https://jsonplaceholder.typicode.com/posts/${id}`
-      );
+  const deletePost = (id: number) => {
+    dispatch(postsOp.deletePost(id));
 
-      setPost(await response.json());
-    } catch (error) {
-      console.log("error", error);
-    }
-  };
-
-  const deletePost = async (id: number) => {
-    try {
-      await fetch(`https://jsonplaceholder.typicode.com/posts/${id}`, {
-        method: "DELETE",
-      });
-
-      navigate("/posts");
-    } catch (error) {
-      console.log("error", error);
-    }
+    navigate("/posts");
   };
 
   useEffect(() => {
-    getPost();
-  }, []);
+    if (id) {
+      dispatch(postsOp.getPostById(+id));
+    }
+  }, [dispatch, id]);
 
   return (
     <>
